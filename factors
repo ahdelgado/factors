@@ -1,0 +1,31 @@
+def factors( input, reverse = false )
+  result = {}
+
+  input.each do |i|
+    array = []
+    input.each do |j|
+      unless i == j
+        if reverse
+          if (j % i).zero?
+            array << j
+          end
+        else
+          if (i % j).zero?
+            array << j
+          end
+        end
+      end
+    end
+    result[i] = array
+  end
+  result.to_s.gsub(/=>/, ': ')
+end
+
+
+array = [10, 5, 2, 20]
+
+#Given an array of [10, 5, 2, 20], the output would be: {10: [5, 2], 5: [], 2: [], 20: [10,5,2]}
+puts factors(array)
+
+#Given an array of [10, 5, 2, 20], the output would be: {10: [20], 5: [10,20], 2: [10, 20], 20: []}
+puts factors(array, true)
