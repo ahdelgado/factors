@@ -15,7 +15,7 @@ def find_factors( input, reverse = false )     #PERFORMANCE O(n^2)
   input.each do |i|
     temp = []
     input.each do |j|
-      unless i == j            # Avoid testing if integer is factor or multiple of itself
+      unless i == j            # Avoid testing integer against itself
         if reverse
           if (j % i).zero?     # Calculation for finding multiples
             temp << j
