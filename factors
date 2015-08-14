@@ -1,31 +1,79 @@
-def factors( input, reverse = false )
+class Integer
+  # Returns all factors of given integer
+  def all_factors
+    1.upto(Math.sqrt(self)).select { |i| (self % i).zero? }.inject([]) do |f, i|
+      f << i
+      f << self/i unless i == self/i
+      f
+    end.sort
+  end
+end
+
+def find_factors( input, reverse = false )     #PERFORMANCE O(n^2)
   result = {}
 
   input.each do |i|
-    array = []
+    temp = []
     input.each do |j|
-      unless i == j
+      unless i == j            # Avoid testing if integer is factor or multiple of itself
         if reverse
-          if (j % i).zero?
-            array << j
+          if (j % i).zero?     # Calculation for finding multiples
+            temp << j
           end
         else
-          if (i % j).zero?
-            array << j
+          if (i % j).zero?     # Calculation for finding factors
+            temp << j
           end
         end
       end
     end
-    result[i] = array
+    result[i] = temp
   end
   result.to_s.gsub(/=>/, ': ')
+end
+
+def cache_factors(input)                   #PERFORMANCE O(log(n))
+  input.sort! {|x, y| y <=> x}
+  input.inject({}) do |result, num|
+    num_factors = num.all_factors
+    num_factors.pop  # Don't need last number since it is num itself
+
+    # Skip computation if we have already computed factors of given number
+    unless result.has_key?(num)
+      temp = []
+      num_factors.each do |factor|
+        #For every factor, run binary search on input and see if factor is present.
+        #If not present, add it to result
+        unless input.bsearch { |x| x - factor }.nil?     # bsearch method requires Ruby 2.0+
+          factors_of_factor = factor.all_factors
+          factors_of_factor.pop # Don't need last number
+
+          #Cache the factors
+          result[factor] = factors_of_factor.select do |item|
+            !input.bsearch do |x|
+              x - item
+            end.nil?
+          end unless result.has_key?(factor)
+          temp << factor
+        end
+      end
+      result[num] = temp
+    end
+    result
+  end
 end
 
 
 array = [10, 5, 2, 20]
 
+#Find factors
 #Given an array of [10, 5, 2, 20], the output would be: {10: [5, 2], 5: [], 2: [], 20: [10,5,2]}
-puts factors(array)
+puts find_factors(array)
 
+#Find multiples
 #Given an array of [10, 5, 2, 20], the output would be: {10: [20], 5: [10,20], 2: [10, 20], 20: []}
-puts factors(array, true)
+puts find_factors(array, true)
+
+#Cache implementation of finding factors
+#Given an array of [10, 5, 2, 20], the output would be: {2=>[], 5=>[], 10=>[2, 5], 20=>[2, 5, 10]}
+puts cache_factors(array)
